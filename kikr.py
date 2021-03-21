@@ -12,6 +12,7 @@ import sys
 import getopt
 import sqlite3
 import threading
+from lib.database_manager import DatabaseManager
 
 def main(argv):
     """ Process command line argument and act as parent threading
@@ -22,7 +23,7 @@ def main(argv):
     
     # Attempt to process arguments
     try:
-        opts, args = getopt.getopt(argv, "hv", ("help", "version"))
+        opts, args = getopt.getopt(argv, "hvln:m:d:s:", ("help", "version", "list", "new=", "modify=", "delete=", "start="))
     except getopt.GetoptError as err:
         print("[E] Error processing arguments: {}!".format(err))
         exit(1)
@@ -141,7 +142,7 @@ def main(argv):
     elif action == "delete":
         # Delete a bot
         # Print status message
-        do_it = input("[I] >Delete bot {}? (y/n): ")
+        do_it = input("[I] >Delete bot {}? (y/n): ".format(bot_name))
         
         if do_it == "y":
             # Print status message and delete bot
@@ -155,8 +156,15 @@ def main(argv):
             
     elif action == "start":
         # Start the bots
-        for bot in bot_name_list:
-            ThreadManager.start(bot)
+        bots_to_start = bot_name_list.split(",")
+        
+        for bot in bots_to_start:
+            # Pull the bots info from the database
+            bot_info = db_manager.info(bot)
+            
+            # Create a new thread for the bot
+            new_thread = threading.Thread(target=PATH_TO_BOT, args=(bot, bot_info))
+            new_thread.start
 
 # Run the script
 if __name__ == "__main__":

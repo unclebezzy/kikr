@@ -6,6 +6,11 @@ class DatabaseManager(object):
     
     Methods:
         __init__() - Connect to the database
+        list() - List all bots
+        new() - Create a new bot
+        modify() - Modify a bot
+        delete() - Delete a bot
+        info() - Get info on a bot
     """
     
     def __init__(self, db_file):
@@ -121,3 +126,19 @@ class DatabaseManager(object):
         except sqlite3.Error as err:
             print("[E] Error deleting bot: {}".format(err))
             exit(1)
+            
+    def info(self, bot_name):
+        """ Get a bots database entry
+        
+        Arguments:
+            bot_name - string - The bot to get info on
+        """
+        
+        # Create and run the query
+        sql_query = """ SELECT * FROM chatbots WHERE bot_name=? """
+        query_data = (bot_name,)
+        self.cursor.execute(sql_query, query_data)
+        bot_info = self.cursor.fetchone()
+        
+        # Return the info
+        return bot_info
